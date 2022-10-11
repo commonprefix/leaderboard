@@ -12,7 +12,7 @@ type Contractor = {
   percentage?: number,
 }
 
-const Home: NextPage = ({contractors}: {contractors: Contractor[]}) => {
+const Home = ({contractors}: {contractors: Contractor[]}) => {
   return (
     <div className={styles.container}>
       <Head>
@@ -38,13 +38,16 @@ const Home: NextPage = ({contractors}: {contractors: Contractor[]}) => {
             ) :
             contractors.map(
               contractor =>
-              <tr className={styles.row}>
+              <tr className={styles.row} key={contractor.name}>
                 <td>{contractor.name}</td>
                 <td>
                   <div style={{
                     backgroundColor: contractor.color,
                     color: invertColor(contractor.color, true),
-                    width: (5 * contractor.percentage + 50) + 'px',
+                    width:
+                    (5 *
+                      (typeof contractor.percentage === 'undefined'? 0: contractor.percentage)
+                      + 50) + 'px',
                     height: '30px',
                     marginLeft: '50px',
                     display: 'flex',
