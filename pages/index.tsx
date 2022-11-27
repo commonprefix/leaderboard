@@ -74,6 +74,8 @@ const Home = ({contractors}: {contractors: Contractor[]}) => {
 export async function getServerSideProps() {
   let contractors: Contractor[] = await getCurrentMonthHours()
 
+  console.log({contractors})
+
   if (contractors.length == 0) {
     return contractors
   }
