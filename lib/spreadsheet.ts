@@ -1,13 +1,11 @@
-'use strict';
-
-const SPREADSHEET_ID = '1Z04tzlkR5i0eHfm23XHbjR-GZdDNAR8QfPSezGwuhpE'
+const SPREADSHEET_ID = '1Bceo3Srq6E4X_3Xkinftt1SoitcEEiBrYbQEJFOIfk8'
 
 const { google } = require('googleapis');
 const sheets = google.sheets('v4')
 const { promisify } = require('util')
 sheets.spreadsheets.values.getAsync = promisify(sheets.spreadsheets.values.get)
 
-async function getCurrentMonthHours() {
+export async function getCurrentMonthHours(): Promise<{ [index: string]: number }> {
   const auth = await google.auth.getClient({
     credentials: require('./credentials.json'),
     scopes: ['https://www.googleapis.com/auth/spreadsheets'],
@@ -15,7 +13,7 @@ async function getCurrentMonthHours() {
 
   const nowDate = new Date()
 
-  async function getRange(range) {
+  async function getRange(range: string) {
     return (await sheets.spreadsheets.values.getAsync({
       auth,
       spreadsheetId: SPREADSHEET_ID,
@@ -23,9 +21,7 @@ async function getCurrentMonthHours() {
     })).data.values
   }
 
-  const contractorNames = (await getRange('Contractors!A2:A')).flat()
-
-  function parseDate(dateString) {
+  function parseDate(dateString: string) {
     let day, month, year
 
     if (dateString.indexOf('-') != -1) {
@@ -46,28 +42,27 @@ async function getCurrentMonthHours() {
     return {month, year}
   }
 
-  let logPromises = contractorNames.map(async name => {
-    let log = await getRange(`'${name} Hours'!B2:C`)
-    let hours = 0
+  let log = await getRange(`'time'!A1:F`)
+  const contractors: {[index: string]: number} = {}
 
-    for (const entry of log) {
-      if (entry.length >= 2) {
-        const [logHours, logDate] = entry
-        const {month, year} = parseDate(logDate)
+  for (const entry of log) {
+    const [type, customer, service, contractor, date, hours] = entry
 
-        if (year == nowDate.getFullYear() && month == nowDate.getMonth() + 1) {
-          hours += parseFloat(logHours)
-        }
+    if (date === undefined
+    || date.trim() == ''
+    || contractor.trim() == ''
+    || parseFloat(contractor.hours) == 0) {
+      continue
+    }
+    const {month, year} = parseDate(date)
+
+    if (year == nowDate.getFullYear() && month == nowDate.getMonth() + 1) {
+      if (contractors[contractor] === undefined) {
+        contractors[contractor] = 0
       }
+      contractors[contractor] += parseFloat(hours)
     }
+  }
 
-    return {
-      name,
-      hours: Math.round(100 * hours) / 100
-    }
-  })
-
-  return await Promise.all(logPromises)
+  return contractors
 }
-
-module.exports = { getCurrentMonthHours }
