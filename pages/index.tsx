@@ -21,7 +21,9 @@ const Home = ({contractors}: {contractors: Contractor[]}) => {
 
       <main className={styles.main}>
         <h1 className={styles.title}>
-          High Scores - {(new Date()).toLocaleString('default', { month: 'short', year: 'numeric' })}
+          <span className={styles.titleCaption}>High Scores</span>
+          <span className={styles.titleDash}> - </span>
+          <span className={styles.titleDate}>{(new Date()).toLocaleString('default', { month: 'short', year: 'numeric' })}</span>
         </h1>
 
         {
@@ -48,17 +50,7 @@ const Home = ({contractors}: {contractors: Contractor[]}) => {
                     <div style={{
                       backgroundColor: contractor.color,
                       color: invertColor(contractor.color, true),
-                      width:
-                      (5 * contractor.percentage + 50) + 'px',
-                      height: '30px',
-                      marginLeft: '50px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'center',
-                      padding: '5px',
-                      borderColor: '#eee',
-                      borderWidth: '5px',
-                      borderRightStyle: 'solid'
+                      width: (8 + 80 * contractor.percentage / 100) + '%',
                     }}>
                       {Math.round(100 * contractor.hours) / 100}
                     </div>

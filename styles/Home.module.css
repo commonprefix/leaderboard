@@ -15,11 +15,23 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  width: 755px;
+  max-width: 100%;
+  margin: auto;
 }
 
 .table {
   border-collapse: separate;
   border-spacing: 0 1em;
+  width: 100%;
+}
+
+.table th:first-child {
+  width: 18%;
+}
+
+.table th:last-child {
+  width: 82%;
 }
 
 .table thead {
@@ -29,4 +41,39 @@
 
 .row {
   margin: 50px 0;
+}
+
+.table td div {
+  height: 30px;
+  margin-left: 50px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 5px;
+  border-color: #eee;
+  border-width: 5px;
+  border-right-style: solid;
+  overflow: hidden;
+}
+
+@media (max-width: 800px) {
+  .table, .table tbody, .table thead, .table tr, .table th, .table td {
+    display: block;
+    width: 100%;
+  }
+  .table thead {
+    display: none;
+  }
+  .table td div {
+    margin-left: 0;
+  }
+  .title span {
+    display: block;
+  }
+  .title span.titleDash {
+    display: none;
+  }
+  .main {
+    align-items: flex-start;
+  }
 }
