@@ -60,6 +60,9 @@ export async function getCurrentMonthHours(): Promise<{ [index: string]: number 
       if (contractors[contractor] === undefined) {
         contractors[contractor] = 0
       }
+      if (isNaN(parseFloat(hours))) {
+        continue
+      }
       contractors[contractor] += parseFloat(hours)
     }
   }
