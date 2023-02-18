@@ -9,11 +9,11 @@
 
 .main {
   min-height: 100vh;
-  padding: 4rem 0;
+  padding: 1rem 0;
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: initial;
   align-items: center;
   width: 755px;
   max-width: 100%;
@@ -54,6 +54,29 @@
   border-width: 5px;
   border-right-style: solid;
   overflow: hidden;
+}
+
+.title span.titleArrow {
+  margin: 10px;
+  padding: 0 50px;
+}
+
+.title span.titleArrow a, .title span.titleArrow a:link, .title span.titleArrow a:visited {
+  color: #999;
+}
+
+.title span.titleArrow a:hover {
+  color: white;
+}
+
+.title span.titleCaption {
+  display: block;
+  text-align: center;
+  margin: 5px;
+}
+
+.title {
+  margin: 0;
 }
 
 @media (max-width: 800px) {

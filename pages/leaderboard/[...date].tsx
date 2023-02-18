@@ -1,6 +1,5 @@
-import { getMonthHours } from '../lib/spreadsheet'
-import { createHash } from 'crypto'
-import Leaderboard from '../components/leaderboard'
+import { getMonthHours } from '../../lib/spreadsheet'
+import Leaderboard from '../../components/leaderboard'
 
 function getCurrentDate() {
   const nowDate = new Date()
@@ -11,8 +10,11 @@ function getCurrentDate() {
   }
 }
 
-export async function getServerSideProps() {
-  const { year, month } = getCurrentDate()
+export async function getServerSideProps(context: any) {
+  let [year, month] = context.params.date
+  year = parseInt(year)
+  month = parseInt(month)
+
   let contractorHours: {
     [index: string]: number
   } = await getMonthHours(year, month)

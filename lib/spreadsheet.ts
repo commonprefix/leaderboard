@@ -5,13 +5,11 @@ const sheets = google.sheets('v4')
 const { promisify } = require('util')
 sheets.spreadsheets.values.getAsync = promisify(sheets.spreadsheets.values.get)
 
-export async function getCurrentMonthHours(): Promise<{ [index: string]: number }> {
+export async function getMonthHours(year: number, month: number): Promise<{ [index: string]: number }> {
   const auth = await google.auth.getClient({
     credentials: require('./credentials.json'),
     scopes: ['https://www.googleapis.com/auth/spreadsheets'],
   });
-
-  const nowDate = new Date()
 
   async function getRange(range: string) {
     return (await sheets.spreadsheets.values.getAsync({
@@ -54,9 +52,9 @@ export async function getCurrentMonthHours(): Promise<{ [index: string]: number 
     || parseFloat(contractor.hours) == 0) {
       continue
     }
-    const {month, year} = parseDate(date)
+    const {month: logMonth, year: logYear} = parseDate(date)
 
-    if (year == nowDate.getFullYear() && month == nowDate.getMonth() + 1) {
+    if (year == logYear && month == logMonth) {
       if (contractors[contractor] === undefined) {
         contractors[contractor] = 0
       }
