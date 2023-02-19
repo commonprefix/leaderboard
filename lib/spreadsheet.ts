@@ -1,24 +1,54 @@
-const SPREADSHEET_ID = '1Bceo3Srq6E4X_3Xkinftt1SoitcEEiBrYbQEJFOIfk8'
+import * as dotenv from 'dotenv'
+
+const DASHBOARD_ID = '1Bceo3Srq6E4X_3Xkinftt1SoitcEEiBrYbQEJFOIfk8'
+const PROJECTIONS_ID = '1xJDb-7hHlNdISarFAUxWQ1JoucuMR44ZFOxYvqmNF1k'
 
 const { google } = require('googleapis');
 const sheets = google.sheets('v4')
 const { promisify } = require('util')
 sheets.spreadsheets.values.getAsync = promisify(sheets.spreadsheets.values.get)
 
-export async function getMonthHours(year: number, month: number): Promise<{ [index: string]: number }> {
-  const auth = await google.auth.getClient({
-    credentials: require('./credentials.json'),
-    scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-  });
+class GoogleSpreadsheetClient {
+  auth: any
 
-  async function getRange(range: string) {
+  async init() {
+    dotenv.config()
+
+    if (process.env.GOOGLE_AUTH === undefined) {
+      return
+    }
+
+    const credentials = JSON.parse(process.env.GOOGLE_AUTH)
+
+    this.auth = await google.auth.getClient({
+      credentials,
+      scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+    });
+  }
+
+  async getRange(spreadsheetId: string, range: string) {
     return (await sheets.spreadsheets.values.getAsync({
-      auth,
-      spreadsheetId: SPREADSHEET_ID,
+      auth: this.auth,
+      spreadsheetId,
       range,
     })).data.values
   }
+}
 
+export async function getMonthProjections(year: number, month: number): Promise<{ [index: string ]: number }> {
+  const client = new GoogleSpreadsheetClient()
+  await client.init()
+
+  const projections = await client.getRange(PROJECTIONS_ID, `'${year}-${('0' + month).slice(-2)}'!A1:B`)
+
+  for (const projection of projections) {
+    const [contractor, hours] = projection
+  }
+
+  return {}
+}
+
+export async function getMonthHours(year: number, month: number): Promise<{ [index: string]: number }> {
   function parseDate(dateString: string) {
     let day, month, year
 
@@ -40,7 +70,10 @@ export async function getMonthHours(year: number, month: number): Promise<{ [ind
     return {month, year}
   }
 
-  let log = await getRange(`'time'!A1:F`)
+  const client = new GoogleSpreadsheetClient()
+  await client.init()
+
+  let log = await client.getRange(DASHBOARD_ID, `'time'!A1:F`)
   const contractors: {[index: string]: number} = {}
 
   for (const entry of log) {
