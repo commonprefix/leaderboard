@@ -13,5 +13,5 @@
 * For dev:
   - `npm run dev`
 * For production
-  - Build using `run run build`
+  - Build using `npm run build`
   - Run using `npm run start`, or, for persistence, use `pm2 start npm --name 'common-prefix-leaderboard' -- start`
