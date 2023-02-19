@@ -17,8 +17,6 @@ export async function getServerSideProps() {
   } = await getMonthHours(year, month)
   const monthProjections = await getMonthProjections(year, month)
 
-  console.log({ year, month, contractorHours, monthProjections })
-
   return {
     props: { year, month, contractorHours, monthProjections }
   }

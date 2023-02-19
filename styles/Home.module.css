@@ -92,6 +92,10 @@
   margin: 5px;
 }
 
+.title .titleDateShort {
+  display: none;
+}
+
 .title {
   margin: 0;
 }
@@ -114,6 +118,12 @@
     margin: 10px;
     padding: 0;
     display: inline;
+  }
+  .title .titleDateShort {
+    display: inline;
+  }
+  .title .titleDateLong {
+    display: none;
   }
   .main {
     align-items: flex-start;
