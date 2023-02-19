@@ -1,5 +1,4 @@
-import { getMonthHours } from '../lib/spreadsheet'
-import { createHash } from 'crypto'
+import { getMonthHours, getMonthProjections } from '../lib/spreadsheet'
 import Leaderboard from '../components/leaderboard'
 
 function getCurrentDate() {
@@ -13,12 +12,15 @@ function getCurrentDate() {
 
 export async function getServerSideProps() {
   const { year, month } = getCurrentDate()
-  let contractorHours: {
+  const contractorHours: {
     [index: string]: number
   } = await getMonthHours(year, month)
+  const monthProjections = await getMonthProjections(year, month)
+
+  console.log({ year, month, contractorHours, monthProjections })
 
   return {
-    props: { year, month, contractorHours }
+    props: { year, month, contractorHours, monthProjections }
   }
 }
 

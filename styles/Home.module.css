@@ -20,6 +20,25 @@
   margin: auto;
 }
 
+.progressBarContainer {
+  position: relative;
+}
+
+.progressBar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-color: #eee;
+  border-width: 5px;
+  border-right-style: solid;
+  overflow: hidden;
+}
+
+.progressBar.projectionBar {
+  top: 3px;
+  height: 24px;
+}
+
 .table {
   border-collapse: separate;
   border-spacing: 0 1em;
@@ -50,10 +69,6 @@
   flex-direction: column;
   justify-content: center;
   padding: 5px;
-  border-color: #eee;
-  border-width: 5px;
-  border-right-style: solid;
-  overflow: hidden;
 }
 
 .title span.titleArrow {

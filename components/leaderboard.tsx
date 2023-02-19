@@ -8,8 +8,10 @@ import Link from 'next/link'
 type Contractor = {
   name: string,
   hours: number,
+  hoursProjection?: number,
   color: string,
   percentage: number,
+  percentageProjection?: number
 }
 
 function prevMonth(year: number, month: number) {
@@ -30,27 +32,43 @@ function nextMonth(year: number, month: number) {
   return `${year}/${('0' + month).slice(-2)}`
 }
 
-export default ({year, month, contractorHours}: {
+export default ({year, month, contractorHours, monthProjections}: {
   year: number,
   month: number,
   contractorHours: {
+    [index: string]: number
+  },
+  monthProjections: {
     [index: string]: number
   }
 }) => {
   let contractors: Contractor[] = []
 
-  const maxHours = Math.max(...Object.values(contractorHours))
+  const maxHours = Math.max(
+    ...[...Object.values(contractorHours), ...Object.values(monthProjections)]
+  )
 
   for (const [name, hours] of Object.entries(contractorHours)) {
-    contractors.push({
+    const contractor: Contractor = {
       name, hours,
       color: '#' + createHash('md5').update(name).digest('hex').slice(10, 16),
       percentage: Math.round(100 * hours / maxHours)
-    })
+    }
+
+    if (monthProjections[name]) {
+      contractor.hoursProjection = monthProjections[name]
+      contractor.percentageProjection = Math.round(100 * monthProjections[name] / maxHours)
+    }
+
+    contractors.push(contractor)
   }
 
   contractors.sort((a, b) => b.hours - a.hours)
   contractors = contractors.filter(contractor => contractor.hours > 0)
+
+  const prevLink = prevMonth(year, month)
+  const nextLink = nextMonth(year, month)
+
   return (
     <div className={styles.container}>
       <Head>
@@ -60,12 +78,14 @@ export default ({year, month, contractorHours}: {
       <main className={styles.main}>
         <h1 className={styles.title}>
           <span className={styles.titleCaption}>High Scores</span>
-          <span className={styles.titleArrow}><Link href={`/leaderboard/${prevMonth(year, month)}`}>◀</Link></span>
+          <span className={styles.titleArrow} title={prevLink}>
+            <Link href={`/leaderboard/${prevLink}`}>◀</Link>
+          </span>
           <span className={styles.titleDate}>{(new Date(year, month - 1)).toLocaleString('default', { month: 'short', year: 'numeric' })}</span>
-          <span className={styles.titleArrow}>
+          <span className={styles.titleArrow} title={nextLink}>
           {
             year == new Date().getFullYear() && month == new Date().getMonth() + 1?
-            <></>: <Link href={`/leaderboard/${nextMonth(year, month)}`}>▶</Link>
+            <></>: <Link href={`/leaderboard/${nextLink}`}>▶</Link>
           }
           </span>
         </h1>
@@ -91,14 +111,28 @@ export default ({year, month, contractorHours}: {
                 contractor =>
                 <tr className={styles.row} key={contractor.name}>
                   <td>{contractor.name}</td>
-                  <td>
+                  <td className={styles.progressBarContainer}>
+                    <div></div>
                     <div style={{
                       backgroundColor: contractor.color,
                       color: invertColor(contractor.color, true),
                       width: (8 + 80 * contractor.percentage / 100) + '%',
-                    }}>
+                    }} className={styles.progressBar}>
                       {Math.round(100 * contractor.hours) / 100}
                     </div>
+                    {
+                      contractor.hoursProjection && contractor.percentageProjection?
+                      <div style={{
+                        width: (8 + 80 * contractor.percentageProjection / 100) + '%',
+                        borderRight:
+                          contractor.hoursProjection < contractor.hours?
+                          '3px dashed ' + invertColor(contractor.color, true):
+                          '3px dashed rgba(255, 255, 255, 0.3)'
+                        }}
+                        className={`${styles.progressBar} ${styles.projectionBar}`}
+                        title={`${Math.round(100 * contractor.hours) / 100} hours worked of ${contractor.hoursProjection} projected`}
+                        ></div>: <></>
+                    }
                   </td>
                 </tr>
               )

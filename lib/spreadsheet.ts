@@ -36,16 +36,29 @@ class GoogleSpreadsheetClient {
 }
 
 export async function getMonthProjections(year: number, month: number): Promise<{ [index: string ]: number }> {
+  const ret: { [ index: string ]: number } = {}
   const client = new GoogleSpreadsheetClient()
   await client.init()
 
-  const projections = await client.getRange(PROJECTIONS_ID, `'${year}-${('0' + month).slice(-2)}'!A1:B`)
+  let projections: [string, string][] = []
+
+  try {
+    projections = await client.getRange(PROJECTIONS_ID, `'${year}-${('0' + month).slice(-2)}'!A2:B`)
+  }
+  catch {
+    return ret
+  }
 
   for (const projection of projections) {
     const [contractor, hours] = projection
+
+    if (contractor === undefined || hours === undefined || hours == '0') {
+      continue
+    }
+    ret[contractor] = parseFloat(hours)
   }
 
-  return {}
+  return ret
 }
 
 export async function getMonthHours(year: number, month: number): Promise<{ [index: string]: number }> {
