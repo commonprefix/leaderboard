@@ -90,11 +90,12 @@
   .table td div {
     margin-left: 0;
   }
-  .title span {
-    display: block;
-  }
   .title span.titleDash {
     display: none;
+  }
+  .title span.titleArrow {
+    margin: 10px;
+    padding: 0;
   }
   .main {
     align-items: flex-start;
