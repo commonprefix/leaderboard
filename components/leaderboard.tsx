@@ -62,7 +62,12 @@ export default ({year, month, contractorHours}: {
           <span className={styles.titleCaption}>High Scores</span>
           <span className={styles.titleArrow}><Link href={`/leaderboard/${prevMonth(year, month)}`}>◀</Link></span>
           <span className={styles.titleDate}>{(new Date(year, month - 1)).toLocaleString('default', { month: 'short', year: 'numeric' })}</span>
-          <span className={styles.titleArrow}><Link href={`/leaderboard/${nextMonth(year, month)}`}>▶</Link></span>
+          <span className={styles.titleArrow}>
+          {
+            year == new Date().getFullYear() && month == new Date().getMonth() + 1?
+            <></>: <Link href={`/leaderboard/${nextMonth(year, month)}`}>▶</Link>
+          }
+          </span>
         </h1>
 
         {

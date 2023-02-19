@@ -59,6 +59,8 @@
 .title span.titleArrow {
   margin: 10px;
   padding: 0 50px;
+  display: inline-block;
+  width: 150px;
 }
 
 .title span.titleArrow a, .title span.titleArrow a:link, .title span.titleArrow a:visited {
@@ -96,6 +98,7 @@
   .title span.titleArrow {
     margin: 10px;
     padding: 0;
+    display: inline;
   }
   .main {
     align-items: flex-start;
