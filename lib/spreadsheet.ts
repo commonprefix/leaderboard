@@ -8,6 +8,15 @@ const sheets = google.sheets('v4')
 const { promisify } = require('util')
 sheets.spreadsheets.values.getAsync = promisify(sheets.spreadsheets.values.get)
 
+type LogEntry = {
+  type: string,
+  customer: string,
+  service: string,
+  contractor: string,
+  date: string,
+  hours: string
+}
+
 class GoogleSpreadsheetClient {
   auth: any
 
@@ -61,54 +70,70 @@ export async function getMonthProjections(year: number, month: number): Promise<
   return ret
 }
 
-export async function getMonthHours(year: number, month: number): Promise<{ [index: string]: number }> {
-  function parseDate(dateString: string) {
-    let day, month, year
-
-    if (dateString.indexOf('-') != -1) {
-      const [a, b, c] = dateString.split('-')
-      if (a.length == 4) {
-        [year, month, day] = [a, b, c]
-      }
-      else {
-        [day, month, year] = [a, b, c]
-      }
-    }
-    else {
-      [day, month, year] = dateString.split('/')
-    }
-    year = parseInt(year)
-    month = parseInt(month)
-
-    return {month, year}
-  }
-
+export async function getLog(): Promise<LogEntry[]> {
   const client = new GoogleSpreadsheetClient()
   await client.init()
 
-  let log = await client.getRange(DASHBOARD_ID, `'time'!A1:F`)
+  const log = await client.getRange(DASHBOARD_ID, `'time'!A1:F`)
+
+  return log.map(
+    ([type, customer, service, contractor, date, hours]: string[]): LogEntry =>
+    ({type, customer, service, contractor, date, hours})
+  ).filter(({type, customer, service, contractor, date, hours}: LogEntry) => {
+    return date !== undefined
+        && date.trim() !== ''
+        && contractor.trim() !== ''
+        && !isNaN(parseFloat(hours))
+        && parseFloat(hours) !== 0
+  })
+}
+
+function parseDate(dateString: string) {
+  let day, month, year
+
+  if (dateString.indexOf('-') != -1) {
+    const [a, b, c] = dateString.split('-')
+    if (a.length == 4) {
+      [year, month, day] = [a, b, c]
+    }
+    else {
+      [day, month, year] = [a, b, c]
+    }
+  }
+  else {
+    [day, month, year] = dateString.split('/')
+  }
+  year = parseInt(year)
+  month = parseInt(month)
+
+  return {month, year}
+}
+
+function filterLogByDate(desiredYear: number, desiredMonth: number) {
+  return (entry: LogEntry): boolean => {
+    const {month, year} = parseDate(entry.date)
+
+    return year == desiredYear && month == desiredMonth
+  }
+}
+
+function filterLogByContractor(desiredContractor: string) {
+  return (entry: LogEntry) => entry.contractor == desiredContractor
+}
+
+export async function getMonthHours(year: number, month: number): Promise<{ [index: string]: number }> {
+  let log = await getLog()
   const contractors: {[index: string]: number} = {}
 
+  log = log.filter(filterLogByDate(year, month))
+
   for (const entry of log) {
-    const [type, customer, service, contractor, date, hours] = entry
+    const {contractor, hours} = entry
 
-    if (date === undefined
-    || date.trim() == ''
-    || contractor.trim() == ''
-    || parseFloat(contractor.hours) == 0) {
-      continue
+    if (contractors[contractor] === undefined) {
+      contractors[contractor] = 0
     }
-    const {month: logMonth, year: logYear} = parseDate(date)
-
-    if (year == logYear && month == logMonth) {
-      if (contractors[contractor] === undefined) {
-        contractors[contractor] = 0
-      }
-      if (isNaN(parseFloat(hours))) {
-        continue
-      }
-      contractors[contractor] += parseFloat(hours)
-    }
+    contractors[contractor] += parseFloat(hours)
   }
 
   return contractors
