@@ -102,6 +102,7 @@ export default ({year, month, contractorHours, monthProjections}: {
           <table className={styles.table}>
             <thead>
               <tr>
+                <th className={styles.emoji}></th>
                 <th>Name</th>
                 <th>Score</th>
               </tr>
@@ -109,8 +110,13 @@ export default ({year, month, contractorHours, monthProjections}: {
             <tbody>
             {
               contractors.map(
-                contractor =>
+                (contractor, i) =>
                 <tr className={styles.row} key={contractor.name}>
+                  <td className={styles.emoji}>{i == 0? '🥇':
+                       i == 1? '🥈':
+                       i == 2? '🥉':
+                       i == contractors.length - 1? '💩':
+                       ''}</td>
                   <td>{contractor.name}</td>
                   <td className={styles.progressBarContainer}>
                     <div></div>
