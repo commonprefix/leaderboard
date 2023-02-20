@@ -110,38 +110,44 @@ export default ({year, month, contractorHours, monthProjections}: {
             <tbody>
             {
               contractors.map(
-                (contractor, i) =>
-                <tr className={styles.row} key={contractor.name}>
-                  <td className={styles.emoji}>{i == 0? '🥇':
-                       i == 1? '🥈':
-                       i == 2? '🥉':
-                       i == contractors.length - 1? '💩':
-                       ''}</td>
-                  <td>{contractor.name}</td>
-                  <td className={styles.progressBarContainer}>
-                    <div></div>
-                    <div style={{
-                      backgroundColor: contractor.color,
-                      color: invertColor(contractor.color, true),
-                      width: (8 + 80 * contractor.percentage / 100) + '%',
-                    }} className={styles.progressBar}>
-                      {Math.round(100 * contractor.hours) / 100}
-                    </div>
-                    {
-                      contractor.hoursProjection && contractor.percentageProjection?
+                (contractor, i) => {
+                  const emoji =
+                    i == 0? '🥇':
+                    i == 1? '🥈':
+                    i == 2? '🥉':
+                    i == contractors.length - 1? '💩': ''
+
+                  return <tr className={styles.row} key={contractor.name}>
+                    <td className={
+                      (emoji == ''? styles.empty: '') +
+                      ' ' +
+                      styles.emoji}>{emoji}</td>
+                    <td className={styles.contractor}>{contractor.name}</td>
+                    <td className={styles.progressBarContainer}>
+                      <div></div>
                       <div style={{
-                        width: (8 + 80 * contractor.percentageProjection / 100) + '%',
-                        borderRight:
-                          contractor.hoursProjection < contractor.hours?
-                          '3px dashed ' + invertColor(contractor.color, true):
-                          '3px dashed rgba(255, 255, 255, 0.3)'
-                        }}
-                        className={`${styles.progressBar} ${styles.projectionBar}`}
-                        title={`${Math.round(100 * contractor.hours) / 100} hours worked of ${contractor.hoursProjection} projected`}
-                        ></div>: <></>
-                    }
-                  </td>
-                </tr>
+                        backgroundColor: contractor.color,
+                        color: invertColor(contractor.color, true),
+                        width: (8 + 80 * contractor.percentage / 100) + '%',
+                      }} className={styles.progressBar}>
+                        {Math.round(100 * contractor.hours) / 100}
+                      </div>
+                      {
+                        contractor.hoursProjection && contractor.percentageProjection?
+                        <div style={{
+                          width: (8 + 80 * contractor.percentageProjection / 100) + '%',
+                          borderRight:
+                            contractor.hoursProjection < contractor.hours?
+                            '3px dashed ' + invertColor(contractor.color, true):
+                            '3px dashed rgba(255, 255, 255, 0.3)'
+                          }}
+                          className={`${styles.progressBar} ${styles.projectionBar}`}
+                          title={`${Math.round(100 * contractor.hours) / 100} hours worked of ${contractor.hoursProjection} projected`}
+                          ></div>: <></>
+                      }
+                    </td>
+                    </tr>
+                }
               )
             }
             </tbody>
