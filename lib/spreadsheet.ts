@@ -106,12 +106,12 @@ function parseDate(dateString: string) {
   year = parseInt(year)
   month = parseInt(month)
 
-  return {month, year}
+  return { month, year }
 }
 
 function filterLogByDate(desiredYear: number, desiredMonth: number) {
   return (entry: LogEntry): boolean => {
-    const {month, year} = parseDate(entry.date)
+    const { month, year } = parseDate(entry.date)
 
     return year == desiredYear && month == desiredMonth
   }
@@ -121,7 +121,7 @@ function filterLogByContractor(desiredContractor: string) {
   return (entry: LogEntry) => entry.contractor == desiredContractor
 }
 
-export async function getMonthHours(year: number, month: number): Promise<{ [index: string]: number }> {
+export async function getMonthHoursByContractor(year: number, month: number): Promise<{ [index: string]: number }> {
   let log = await getLog()
   const contractors: {[index: string]: number} = {}
 
@@ -137,4 +137,43 @@ export async function getMonthHours(year: number, month: number): Promise<{ [ind
   }
 
   return contractors
+}
+
+export async function getContractorHoursByMonth(contractor: string):
+  Promise<[number, number, number][]> {
+  let log = await getLog()
+  let ret: [number, number, number][] = []
+
+  log = log.filter(filterLogByContractor(contractor))
+
+  const dict: { [year: string]: { [month: string]: number } } = {}
+
+  for (const { date, hours } of log) {
+    const { month, year } = parseDate(date)
+
+    if (dict[year] === undefined) {
+      dict[year] = {}
+    }
+    if (dict[year][month] === undefined) {
+      dict[year][month] = 0
+    }
+    dict[year][month] += parseFloat(hours)
+  }
+
+  for (const year in dict) {
+    for (const month in dict[year]) {
+      ret.push([parseInt(year), parseInt(month), dict[year][month]])
+    }
+  }
+
+  ret = ret.sort(([year1, month1], [year2, month2]) => {
+    if (year1 == year2) {
+      return month1 - month2
+    }
+    return year1 - year2
+  })
+
+  console.log({ ret })
+
+  return ret
 }
