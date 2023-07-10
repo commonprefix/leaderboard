@@ -77,7 +77,7 @@ export default ({year, month, contractorHours, monthProjections}: {
 
       <main className={styles.main}>
         <h1 className={styles.title}>
-          <span className={styles.titleCaption}>Test!</span>
+          <span className={styles.titleCaption}>High Scores</span>
           <span className={styles.titleArrow} title={prevLink}>
             <Link href={`/leaderboard/${prevLink}`}>◀</Link>
           </span>
@@ -95,7 +95,7 @@ export default ({year, month, contractorHours, monthProjections}: {
           contractors.length == 0 ||
           year < 2000 || year > 2100 || month < 1 || month > 12?
           (
-            <p>Test...</p>
+            <p>No data yet for this month.</p>
           )
           :
           (
