@@ -124,13 +124,8 @@ export default ({year, month, contractorHours, monthProjections}: {
                     <td className={styles.contractor}>{contractor.name}</td>
                     <td className={styles.progressBarContainer}>
                       <div></div>
-                      <div style={{
-                        backgroundColor: contractor.color,
-                        color: invertColor(contractor.color, true),
-                        width: (contractor.percentage) + '%',
-                      }} className={styles.progressBar}>
-                        {Math.round(100 * contractor.hours) / 100}
-                      </div>
+                      <canvas width={{contractor.percentage + '%'}} height="50">
+                      </canvas>
                       {
                         contractor.hoursProjection && contractor.percentageProjection?
                         <div style={{
