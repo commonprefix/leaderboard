@@ -127,14 +127,14 @@ export default ({year, month, contractorHours, monthProjections}: {
                       <div style={{
                         backgroundColor: contractor.color,
                         color: invertColor(contractor.color, true),
-                        width: (8 + 80 * contractor.percentage / 100) + '%',
+                        width: (contractor.percentage) + '%',
                       }} className={styles.progressBar}>
                         {Math.round(100 * contractor.hours) / 100}
                       </div>
                       {
                         contractor.hoursProjection && contractor.percentageProjection?
                         <div style={{
-                          width: (8 + 80 * contractor.percentageProjection / 100) + '%',
+                          width: (contractor.percentageProjection) + '%',
                           borderRight:
                             contractor.hoursProjection < contractor.hours?
                             '3px dashed ' + invertColor(contractor.color, true):
