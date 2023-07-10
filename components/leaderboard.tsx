@@ -114,7 +114,8 @@ export default ({year, month, contractorHours, monthProjections}: {
                   const emoji =
                     i == 0? '🥇':
                     i == 1? '🥈':
-                    i == 2? '🥉': ''
+                    i == 2? '🥉':
+                    i == contractors.length - 1? '💩': ''
 
                   return <tr className={styles.row} key={contractor.name}>
                     <td className={
