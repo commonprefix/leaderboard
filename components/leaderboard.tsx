@@ -69,7 +69,7 @@ export default ({year, month, contractorHours, monthProjections}: {
   const prevLink = prevMonth(year, month)
   const nextLink = nextMonth(year, month)
 
-  return (
+  const html = (
     <div className={styles.container}>
       <Head>
         <title>Common Prefix Leaderboard</title>
@@ -124,8 +124,9 @@ export default ({year, month, contractorHours, monthProjections}: {
                     <td className={styles.contractor}>{contractor.name}</td>
                     <td className={styles.progressBarContainer}>
                       <div></div>
-                      <canvas width={{contractor.percentage + '%'}} height="50">
-                      </canvas>
+                      <div>
+                      <canvas id={`lala${contractor.name}`} width="150" height="15"></canvas>
+                      </div>
                       {
                         contractor.hoursProjection && contractor.percentageProjection?
                         <div style={{
@@ -151,4 +152,11 @@ export default ({year, month, contractorHours, monthProjections}: {
       </main>
     </div>
   )
+  console.log("adsf")
+  const canvas = document.getElementById("lalaOrfeas")
+  //console.log("lkjh")
+  //const ctx = canvas.getContext("2d")
+  //ctx.fillText("a", 10, 10)
+
+  return html
 }
