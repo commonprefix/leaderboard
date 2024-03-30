@@ -139,6 +139,29 @@ export async function getMonthHoursByContractor(year: number, month: number): Pr
   return contractors
 }
 
+type Achievement = {
+  name: string,
+  description: string,
+  icon: string,
+  predicate: (contractorLog: LogEntry[]) => boolean,
+}
+
+const candidateAchievements: Achievement[] = [
+  {
+    name: "Tirones",
+    description: "Log your first consulting hour",
+    icon: "tirones",
+    predicate: (contractorLog: LogEntry[]) => contractorLog.length > 0,
+  },
+]
+
+type CheckedAchievement = Omit<Achievement, 'predicate'>
+
+export async function getContractorAchievements(contractor: string): Promise<CheckedAchievement[]> {
+  const log = (await getLog()).filter(filterLogByContractor(contractor))
+  return candidateAchievements.filter(({ predicate }) => predicate(log)).map(({ name, description, icon }) => ({ name, description, icon }))
+}
+
 export async function getContractorHoursByMonth(contractor: string):
   Promise<[number, number, number][]> {
   let log = await getLog()

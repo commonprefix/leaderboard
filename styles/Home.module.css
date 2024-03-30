@@ -133,6 +133,16 @@
   background-color: green;
 }
 
+.achievements {
+  display: flex;
+}
+
+.achievement {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 @media (max-width: 800px) {
   .table, .table tbody, .table thead, .table tr, .table th, .table td {
     display: block;
