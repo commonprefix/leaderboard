@@ -118,7 +118,7 @@ function filterLogByDate(desiredYear: number, desiredMonth: number) {
 }
 
 function filterLogByContractor(desiredContractor: string) {
-  return (entry: LogEntry) => entry.contractor == desiredContractor
+  return (entry: LogEntry) => entry.contractor.toLowerCase() == desiredContractor.toLowerCase()
 }
 
 export async function getMonthHoursByContractor(year: number, month: number): Promise<{ [index: string]: number }> {
