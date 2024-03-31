@@ -1,4 +1,5 @@
 import * as dotenv from 'dotenv'
+import { CheckedAchievement, achievementsFromLog, candidateAchievements } from './achievement'
 
 const DASHBOARD_ID = '1Bceo3Srq6E4X_3Xkinftt1SoitcEEiBrYbQEJFOIfk8'
 const PROJECTIONS_ID = '1xJDb-7hHlNdISarFAUxWQ1JoucuMR44ZFOxYvqmNF1k'
@@ -8,13 +9,13 @@ const sheets = google.sheets('v4')
 const { promisify } = require('util')
 sheets.spreadsheets.values.getAsync = promisify(sheets.spreadsheets.values.get)
 
-type LogEntry = {
+export type LogEntry = {
   type: string,
   customer: string,
   service: string,
   contractor: string,
   date: string,
-  hours: string
+  hours: number
 }
 
 class GoogleSpreadsheetClient {
@@ -76,16 +77,17 @@ export async function getLog(): Promise<LogEntry[]> {
 
   const log = await client.getRange(DASHBOARD_ID, `'time'!A1:F`)
 
-  return log.map(
-    ([type, customer, service, contractor, date, hours]: string[]): LogEntry =>
-    ({type, customer, service, contractor, date, hours})
-  ).filter(({type, customer, service, contractor, date, hours}: LogEntry) => {
+  return log.filter(
+    ([type, customer, service, contractor, date, hours]: string[]) => {
     return date !== undefined
         && date.trim() !== ''
         && contractor.trim() !== ''
         && !isNaN(parseFloat(hours))
         && parseFloat(hours) !== 0
-  })
+  }).map(
+    ([type, customer, service, contractor, date, hours]: string[]): LogEntry =>
+    ({type, customer, service, contractor, date, hours: parseFloat(hours)})
+  )
 }
 
 function parseDate(dateString: string) {
@@ -121,6 +123,10 @@ function filterLogByContractor(desiredContractor: string) {
   return (entry: LogEntry) => entry.contractor.toLowerCase() == desiredContractor.toLowerCase()
 }
 
+export function filterLogConsulting(entry: LogEntry) {
+  return entry.service.includes('Consulting')
+}
+
 export async function getMonthHoursByContractor(year: number, month: number): Promise<{ [index: string]: number }> {
   let log = await getLog()
   const contractors: {[index: string]: number} = {}
@@ -133,33 +139,18 @@ export async function getMonthHoursByContractor(year: number, month: number): Pr
     if (contractors[contractor] === undefined) {
       contractors[contractor] = 0
     }
-    contractors[contractor] += parseFloat(hours)
+    contractors[contractor] += hours
   }
 
   return contractors
 }
 
-type Achievement = {
-  name: string,
-  description: string,
-  icon: string,
-  predicate: (contractorLog: LogEntry[]) => boolean,
-}
-
-const candidateAchievements: Achievement[] = [
-  {
-    name: "Tirones",
-    description: "Log your first consulting hour",
-    icon: "tirones",
-    predicate: (contractorLog: LogEntry[]) => contractorLog.length > 0,
-  },
-]
-
-type CheckedAchievement = Omit<Achievement, 'predicate'>
-
 export async function getContractorAchievements(contractor: string): Promise<CheckedAchievement[]> {
   const log = (await getLog()).filter(filterLogByContractor(contractor))
-  return candidateAchievements.filter(({ predicate }) => predicate(log)).map(({ name, description, icon }) => ({ name, description, icon }))
+
+  console.log({ log })
+
+  return achievementsFromLog(log)
 }
 
 export async function getContractorHoursByMonth(contractor: string):
@@ -180,7 +171,7 @@ export async function getContractorHoursByMonth(contractor: string):
     if (dict[year][month] === undefined) {
       dict[year][month] = 0
     }
-    dict[year][month] += parseFloat(hours)
+    dict[year][month] += hours
   }
 
   for (const year in dict) {
@@ -195,8 +186,6 @@ export async function getContractorHoursByMonth(contractor: string):
     }
     return year1 - year2
   })
-
-  console.log({ ret })
 
   return ret
 }

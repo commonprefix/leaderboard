@@ -12,12 +12,14 @@
     "dotenv": "^16.0.3",
     "googleapis": "^108.0.0",
     "next": "^13.0.5",
+    "ramda": "^0.29.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-tooltip": "^5.26.3"
   },
   "devDependencies": {
     "@types/node": "18.8.4",
+    "@types/ramda": "^0.29.11",
     "@types/react": "^18.0.25",
     "@types/react-dom": "18.0.6",
     "eslint": "8.25.0",

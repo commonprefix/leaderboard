@@ -9,7 +9,7 @@ function UserProfile(data:
     username: string,
     log?: [number, number, number][],
     maxHours?: number,
-    achievements: { name: string, description: string, icon: string }[],
+    achievements: { name: string, description: string, icon: string | null }[],
 }) {
   const { username } = data
   let body
@@ -32,8 +32,8 @@ function UserProfile(data:
             >
               <div className={styles.achievementIcon}>
                 <Image
-                  src={`/assets/icons/${icon}.svg`}
-                  alt={icon}
+                  src={`/assets/icons/${icon ?? name}.svg`}
+                  alt={icon ?? name}
                   width={100}
                   height={100}
                 />
@@ -105,7 +105,9 @@ export async function getServerSideProps(context: any) {
       username,
       log,
       maxHours,
-      achievements,
+      achievements: achievements.map(
+        ({ name, description, icon }) => ({ name, description, icon: icon? icon: null })
+      )
     }
   }
 }
