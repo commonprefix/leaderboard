@@ -1,0 +1,14 @@
+after  <div style="background-color:#84d7e0;color:#000000;width:30.4%" class="progressBar">
+
+                  color: invertColor(contractor.color, true),
+                  width: (8 + 80 * contractor.percentage / 100) + '%'
+
+
+after 33.9
+    </div>
+
+                    width: (8 + 80 * contractor.percentageProjection / 100) + '%',
+                    borderRight:
+                      contractor.hoursProjection < contractor.hours?
+                      '3px dashed ' + invertColor(contractor.color, true):
+                      '3px dashed rgba(255, 255, 255, 0.3)'

@@ -1,6 +1,7 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import styles from '../styles/Home.module.css'
+import Script from 'next/script'
 import { createHash } from 'crypto'
 import { invertColor } from '../lib/color.js'
 import Link from 'next/link'
@@ -75,6 +76,7 @@ export default ({year, month, contractorHours, monthProjections}: {
         <title>Common Prefix Leaderboard</title>
       </Head>
 
+      <Script src="/assets/colorHours.js" strategy="beforeInteractive" />
       <main className={styles.main}>
         <h1 className={styles.title}>
           <span className={styles.titleCaption}>High Scores</span>
@@ -124,17 +126,18 @@ export default ({year, month, contractorHours, monthProjections}: {
                     <td className={styles.contractor}>{contractor.name}</td>
                     <td className={styles.progressBarContainer}>
                       <div></div>
-                      <div style={{
-                        backgroundColor: contractor.color,
-                        color: invertColor(contractor.color, true),
-                        width: (8 + 80 * contractor.percentage / 100) + '%',
-                      }} className={styles.progressBar}>
-                        {Math.round(100 * contractor.hours) / 100}
+                      <div>
+                      <canvas id={`canvas${contractor.name}`} width="150" height="15"></canvas>
+                      <Script id={`caller${contractor.name}`}>
+                      {`
+                        window.colorHours(document.getElementById(\`canvas${contractor.name}\`))
+                      `}
+                      </Script>
                       </div>
                       {
                         contractor.hoursProjection && contractor.percentageProjection?
                         <div style={{
-                          width: (8 + 80 * contractor.percentageProjection / 100) + '%',
+                          width: (contractor.percentageProjection) + '%',
                           borderRight:
                             contractor.hoursProjection < contractor.hours?
                             '3px dashed ' + invertColor(contractor.color, true):

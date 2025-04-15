@@ -110,29 +110,6 @@
   margin: 0;
 }
 
-.histogram {
-  display: flex;
-  flex-direction: row;
-}
-
-.histogram div {
-  padding: 5px;
-  margin: 5px;
-}
-
-.histogram>div {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  height: 500px;
-  width: 65px;
-  text-align: center;
-}
-
-.histogram div.histobar {
-  background-color: green;
-}
-
 @media (max-width: 800px) {
   .table, .table tbody, .table thead, .table tr, .table th, .table td {
     display: block;
