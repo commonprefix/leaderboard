@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@upstash/redis": "^1.35.0",
     "caniuse-lite": "^1.0.30001434",
     "dotenv": "^16.0.3",
     "googleapis": "^108.0.0",

@@ -1,4 +1,5 @@
 import * as dotenv from 'dotenv'
+import { redis } from './redis';
 
 const HOUR_LOGS_ID = '1Z04tzlkR5i0eHfm23XHbjR-GZdDNAR8QfPSezGwuhpE'
 const PROJECTIONS_ID = '1xJDb-7hHlNdISarFAUxWQ1JoucuMR44ZFOxYvqmNF1k'
@@ -9,7 +10,6 @@ const { promisify } = require('util')
 sheets.spreadsheets.values.getAsync = promisify(sheets.spreadsheets.values.get)
 
 type LogEntry = {
-  type: string,
   customer: string,
   service: string,
   contractor: string,
@@ -40,12 +40,12 @@ class GoogleSpreadsheetClient {
     });
   }
 
-  async getRange(spreadsheetId: string, range: string) {
-    return (await sheets.spreadsheets.values.getAsync({
+  async getRanges(spreadsheetId: string, ranges: string[]) {
+    return (await sheets.spreadsheets.values.batchGet({
       auth: this.auth,
       spreadsheetId,
-      range,
-    })).data.values
+      ranges
+    })).data.valueRanges
   }
 }
 
@@ -57,7 +57,7 @@ export async function getMonthProjections(year: number, month: number): Promise<
   let projections: [string, string][] = []
 
   try {
-    projections = await client.getRange(PROJECTIONS_ID, `'${year}-${('0' + month).slice(-2)}'!A2:B`)
+    projections = await client.getRanges(PROJECTIONS_ID, [`'${year}-${('0' + month).slice(-2)}'!A2:B`])
   }
   catch {
     return ret
@@ -79,12 +79,23 @@ export async function getLog(): Promise<LogEntry[]> {
   const client = new GoogleSpreadsheetClient()
   await client.init()
 
-  const log = await client.getRange(HOUR_LOGS_ID, `'All'!A1:F`)
+  let [hour_logs, last_updated] = await client.getRanges(HOUR_LOGS_ID, [`'All'!B1:F`, `'All'!P2`])
 
-  return log.map(
-    ([type, customer, service, contractor, date, hours]: string[]): LogEntry =>
-    ({type, customer, service, contractor, date, hours})
-  ).filter(({type, customer, service, contractor, date, hours}: LogEntry) => {
+  try {
+    if (!last_updated.values || last_updated.values[0][0] === "") {
+      hour_logs = await redis.get<any>('data');
+      console.log("Using old data")
+    }
+  } catch (error) {
+    console.error("error fetching old data", error)
+  }
+
+  await redis.set('data', hour_logs);
+
+  return hour_logs.values.map(
+    ([customer, service, contractor, date, hours]: string[]): LogEntry =>
+    ({customer, service, contractor, date, hours})
+  ).filter(({customer, service, contractor, date, hours}: LogEntry) => {
     return date !== undefined
         && date.trim() !== ''
         && contractor.trim() !== ''
@@ -181,8 +192,6 @@ export async function getContractorHoursByMonth(contractor: string):
     }
     return year1 - year2
   })
-
-  console.log({ ret })
 
   return ret
 }
