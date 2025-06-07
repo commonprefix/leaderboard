@@ -1,4 +1,4 @@
-import { getMonthHoursByContractor, getMonthProjections } from '../../lib/spreadsheet'
+import { getMonthHoursByContractor, getMonthProjections, LoggedHours } from '../../lib/spreadsheet'
 import Leaderboard from '../../components/leaderboard'
 
 function getCurrentDate() {
@@ -16,7 +16,7 @@ export async function getServerSideProps(context: any) {
   month = parseInt(month)
 
   const contractorHours: {
-    [index: string]: number
+    [index: string]: LoggedHours
   } = await getMonthHoursByContractor(year, month)
 
   const monthProjections:{

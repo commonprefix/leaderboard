@@ -18,7 +18,7 @@ function UserProfile(data:
     body = <div className={styles.histogram}>
       {
         data.log!.map(([year, month, hours], index) =>
-          <div>
+          <div key={index}>
             <div className={styles.histobar} style={{height: Math.round(100 * hours / maxHours) + '%'}}></div>
             <div className={styles.histotext}>{ Math.round(hours) }</div>
           </div>
