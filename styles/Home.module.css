@@ -15,23 +15,33 @@
   flex-direction: column;
   justify-content: initial;
   align-items: center;
-  width: 755px;
+  width: 900px;
   max-width: 100%;
   margin: auto;
 }
 
 .progressBarContainer {
   position: relative;
+  display: flex;
 }
 
 .progressBar {
-  position: absolute;
-  left: 0;
-  top: 0;
   border-color: #eee;
   border-width: 5px;
   border-right-style: solid;
   overflow: hidden;
+  margin: 0;
+}
+
+.progressBar.billableBar {
+    position: absolute;
+    left: 1px;
+    top: 1px;
+}
+
+.progressBar.totalBar {
+  position: relative;
+  padding: 0;
 }
 
 .progressBar.projectionBar {
@@ -43,14 +53,6 @@
   border-collapse: separate;
   border-spacing: 0 1em;
   width: 100%;
-}
-
-.table th:first-child {
-  width: 18%;
-}
-
-.table th:last-child {
-  width: 82%;
 }
 
 .table thead {
@@ -71,6 +73,20 @@
   padding: 5px;
 }
 
+.table th.name {
+  width: 1px;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.table th.score {
+  width: auto;
+}
+
+.table td.score {
+  width: auto;
+}
+
 .table th.emoji {
   width: 32px;
 }
@@ -79,6 +95,13 @@
   padding-right: 10px;
   font-size: 140%;
   position: relative;
+}
+
+.table td div.total {
+  position: relative;
+  color: lightgrey;
+  margin-left: 20px;
+  width: 0px;
 }
 
 .title span.titleArrow {
@@ -134,6 +157,10 @@
 }
 
 @media (max-width: 800px) {
+  .table td div.total {
+    margin-left: 0;
+    margin-top: 5px;
+  }
   .table, .table tbody, .table thead, .table tr, .table th, .table td {
     display: block;
     width: 100%;

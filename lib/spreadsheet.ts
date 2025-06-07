@@ -1,6 +1,6 @@
 import * as dotenv from 'dotenv'
 
-const DASHBOARD_ID = '1Bceo3Srq6E4X_3Xkinftt1SoitcEEiBrYbQEJFOIfk8'
+const HOUR_LOGS_ID = '1Z04tzlkR5i0eHfm23XHbjR-GZdDNAR8QfPSezGwuhpE'
 const PROJECTIONS_ID = '1xJDb-7hHlNdISarFAUxWQ1JoucuMR44ZFOxYvqmNF1k'
 
 const { google } = require('googleapis');
@@ -15,6 +15,11 @@ type LogEntry = {
   contractor: string,
   date: string,
   hours: string
+}
+
+export type LoggedHours = {
+  total: number,
+  billable: number,
 }
 
 class GoogleSpreadsheetClient {
@@ -74,7 +79,7 @@ export async function getLog(): Promise<LogEntry[]> {
   const client = new GoogleSpreadsheetClient()
   await client.init()
 
-  const log = await client.getRange(DASHBOARD_ID, `'time'!A1:F`)
+  const log = await client.getRange(HOUR_LOGS_ID, `'All'!A1:F`)
 
   return log.map(
     ([type, customer, service, contractor, date, hours]: string[]): LogEntry =>
@@ -121,19 +126,23 @@ function filterLogByContractor(desiredContractor: string) {
   return (entry: LogEntry) => entry.contractor == desiredContractor
 }
 
-export async function getMonthHoursByContractor(year: number, month: number): Promise<{ [index: string]: number }> {
+export async function getMonthHoursByContractor(year: number, month: number): Promise<{ [index: string]: LoggedHours }> {
   let log = await getLog()
-  const contractors: {[index: string]: number} = {}
+  const contractors: {[index: string]: LoggedHours} = {}
 
   log = log.filter(filterLogByDate(year, month))
 
   for (const entry of log) {
-    const {contractor, hours} = entry
+    const {contractor, hours, customer} = entry
 
     if (contractors[contractor] === undefined) {
-      contractors[contractor] = 0
+      contractors[contractor] = { total: 0, billable: 0 }
     }
-    contractors[contractor] += parseFloat(hours)
+    contractors[contractor].total += parseFloat(hours)
+
+    if (customer !== "Common Prefix") {
+      contractors[contractor].billable += parseFloat(hours)
+    }
   }
 
   return contractors

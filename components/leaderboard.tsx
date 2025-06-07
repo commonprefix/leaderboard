@@ -4,13 +4,15 @@ import styles from '../styles/Home.module.css'
 import { createHash } from 'crypto'
 import { invertColor } from '../lib/color.js'
 import Link from 'next/link'
+import { LoggedHours } from '../lib/spreadsheet'
 
 type Contractor = {
   name: string,
-  hours: number,
+  hours: LoggedHours,
   hoursProjection?: number,
   color: string,
-  percentage: number,
+  billable_percentage: number,
+  total_percentage: number,
   percentageProjection?: number
 }
 
@@ -32,11 +34,12 @@ function nextMonth(year: number, month: number) {
   return `${year}/${('0' + month).slice(-2)}`
 }
 
+// eslint-disable-next-line import/no-anonymous-default-export
 export default ({year, month, contractorHours, monthProjections}: {
   year: number,
   month: number,
   contractorHours: {
-    [index: string]: number
+    [index: string]: LoggedHours
   },
   monthProjections: {
     [index: string]: number
@@ -45,14 +48,15 @@ export default ({year, month, contractorHours, monthProjections}: {
   let contractors: Contractor[] = []
 
   const maxHours = Math.max(
-    ...[...Object.values(contractorHours), ...Object.values(monthProjections)]
+    ...[...Object.values(contractorHours).map(hours => hours.total), ...Object.values(monthProjections)]
   )
 
   for (const [name, hours] of Object.entries(contractorHours)) {
     const contractor: Contractor = {
       name, hours,
       color: '#' + createHash('md5').update(name).digest('hex').slice(10, 16),
-      percentage: Math.round(100 * hours / maxHours)
+      billable_percentage: Math.round(100 * hours.billable / maxHours),
+      total_percentage: Math.round(100 * hours.total / maxHours)
     }
 
     if (monthProjections[name]) {
@@ -63,8 +67,8 @@ export default ({year, month, contractorHours, monthProjections}: {
     contractors.push(contractor)
   }
 
-  contractors.sort((a, b) => b.hours - a.hours)
-  contractors = contractors.filter(contractor => contractor.hours > 0)
+  contractors.sort((a, b) => b.hours.total - a.hours.total)
+  contractors = contractors.filter(contractor => contractor.hours.total > 0)
 
   const prevLink = prevMonth(year, month)
   const nextLink = nextMonth(year, month)
@@ -103,8 +107,8 @@ export default ({year, month, contractorHours, monthProjections}: {
             <thead>
               <tr>
                 <th className={styles.emoji}></th>
-                <th>Name</th>
-                <th>Score</th>
+                <th className={styles.name}>Name</th>
+                <th className={styles.score}>Score</th>
               </tr>
             </thead>
             <tbody>
@@ -122,26 +126,35 @@ export default ({year, month, contractorHours, monthProjections}: {
                       ' ' +
                       styles.emoji}>{emoji}</td>
                     <td className={styles.contractor}>{contractor.name}</td>
-                    <td className={styles.progressBarContainer}>
-                      <div></div>
+                    <td className={`${styles.progressBarContainer} ${styles.score}`}>
+                      <div style={{
+                        backgroundColor: "grey",
+                        color: invertColor(contractor.color, true),
+                        width: (8 + 80 * contractor.total_percentage / 100) + '%',
+                      }} className={`${styles.progressBar} ${styles.totalBar}`}>
+                      </div>
                       <div style={{
                         backgroundColor: contractor.color,
                         color: invertColor(contractor.color, true),
-                        width: (8 + 80 * contractor.percentage / 100) + '%',
-                      }} className={styles.progressBar}>
-                        {Math.round(100 * contractor.hours) / 100}
+                        width: (8 + 80 * contractor.billable_percentage / 100) + '%',
+                      }} className={`${styles.progressBar} ${styles.billableBar}`}>
+                        {Math.round(100 * contractor.hours.billable) / 100}
+                      </div>
+                      <div
+                        className={styles.total}>
+                        {Math.round(100 * contractor.hours.total) / 100}
                       </div>
                       {
                         contractor.hoursProjection && contractor.percentageProjection?
                         <div style={{
                           width: (8 + 80 * contractor.percentageProjection / 100) + '%',
                           borderRight:
-                            contractor.hoursProjection < contractor.hours?
+                            contractor.hoursProjection < contractor.hours.total?
                             '3px dashed ' + invertColor(contractor.color, true):
                             '3px dashed rgba(255, 255, 255, 0.3)'
                           }}
                           className={`${styles.progressBar} ${styles.projectionBar}`}
-                          title={`${Math.round(100 * contractor.hours) / 100} hours worked of ${contractor.hoursProjection} projected`}
+                          title={`${Math.round(100 * contractor.hours.total) / 100} hours worked of ${contractor.hoursProjection} projected`}
                           ></div>: <></>
                       }
                     </td>
